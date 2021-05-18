@@ -517,6 +517,9 @@ end;</layout>
             <ml id="ID1413408294">val droneCost = 1000;
               <layout>val droneCost = 1000;</layout>
             </ml>
+            <ml id="ID1414719632">val shipmentCostPerKM = 0.25;
+              <layout>val shipmentCostPerKM = 0.25;</layout>
+            </ml>
           </block>
           <block id="ID1413405830">
             <id>Vars</id>
@@ -612,23 +615,234 @@ end;</layout>
           <id>Shipment</id>
           <block id="ID1414118871">
             <id>Colsets</id>
-            <color id="ID1414123231">
+            <block id="ID1414453446">
               <id>Cargo</id>
-              <record>
-                <recordfield>
-                  <id>drone</id>
-                  <id>Drone</id>
-                </recordfield>
-                <recordfield>
-                  <id>shipData</id>
-                  <id>ShipmentData</id>
-                </recordfield>
-              </record>
-              <layout>colset Cargo = record drone:Drone * shipData:ShipmentData;</layout>
-            </color>
+              <color id="ID1414123231">
+                <id>Cargo</id>
+                <record>
+                  <recordfield>
+                    <id>drone</id>
+                    <id>Drone</id>
+                  </recordfield>
+                  <recordfield>
+                    <id>shipData</id>
+                    <id>ShipmentData</id>
+                  </recordfield>
+                </record>
+                <layout>colset Cargo = record drone:Drone * shipData:ShipmentData;</layout>
+              </color>
+            </block>
+            <block id="ID1414459512">
+              <id>ShipmentResult</id>
+              <color id="ID1414471733">
+                <id>ShipmentResult</id>
+                <record>
+                  <recordfield>
+                    <id>cargo</id>
+                    <id>Cargo</id>
+                  </recordfield>
+                  <recordfield>
+                    <id>error</id>
+                    <id>REAL</id>
+                  </recordfield>
+                </record>
+                <layout>colset ShipmentResult = record cargo:Cargo * error:REAL;</layout>
+              </color>
+            </block>
+            <block id="ID1414770320">
+              <id>ClientFeedback</id>
+              <color id="ID1414767877">
+                <id>ClientFeedback</id>
+                <record>
+                  <recordfield>
+                    <id>isSatisfied</id>
+                    <id>BOOL</id>
+                  </recordfield>
+                  <recordfield>
+                    <id>shipRes</id>
+                    <id>ShipmentResult</id>
+                  </recordfield>
+                </record>
+                <layout>colset ClientFeedback = record isSatisfied:BOOL * shipRes:ShipmentResult;</layout>
+              </color>
+            </block>
+          </block>
+          <block id="ID1414388425">
+            <id>Vars</id>
+            <var id="ID1414396134">
+              <type>
+                <id>Cargo</id>
+              </type>
+              <id>cargo</id>
+              <layout>var cargo: Cargo;</layout>
+            </var>
+            <var id="ID1414532294">
+              <type>
+                <id>ShipmentResult</id>
+              </type>
+              <id>shipRes</id>
+              <layout>var shipRes: ShipmentResult;</layout>
+            </var>
+            <var id="ID1414839946">
+              <type>
+                <id>ClientFeedback</id>
+              </type>
+              <id>clientFb</id>
+              <layout>var clientFb: ClientFeedback;</layout>
+            </var>
           </block>
           <block id="ID1414124687">
             <id>Funs</id>
+            <ml id="ID1414880813">fun construct_client_feedback(isSatisfied: bool, shipRes: ShipmentResult) : ClientFeedback =
+let
+    val clientFb = {
+        isSatisfied=isSatisfied,
+        shipRes=shipRes
+    };
+in
+    clientFb
+end;
+              <layout>fun construct_client_feedback(isSatisfied: bool, shipRes: ShipmentResult) : ClientFeedback =
+let
+    val clientFb = {
+        isSatisfied=isSatisfied,
+        shipRes=shipRes
+    };
+in
+    clientFb
+end;</layout>
+            </ml>
+            <ml id="ID1414852630">fun simulate_client_satisfaction(error: real) : bool =
+let
+    val randNum = uniform(0.0, 1.0);
+in
+    randNum &gt; error
+end;
+              <layout>fun simulate_client_satisfaction(error: real) : bool =
+let
+    val randNum = uniform(0.0, 1.0);
+in
+    randNum &gt; error
+end;</layout>
+            </ml>
+            <ml id="ID1414686546">fun get_traversed_distance(shipRes: ShipmentResult, earthCircumference: real) : real =
+let
+    val cargo = #cargo(shipRes);
+    val init_loc = #predictedLocation(#shipData(cargo));
+    val ship_loc = #location(#buyer(#shipment(#shipData(cargo))));
+    val delta_lat = abs(#latitude(init_loc) - #latitude(ship_loc));
+    val delta_long = abs(#longitude(init_loc) - #longitude(ship_loc));
+    val delta_alt = abs(#altitude(init_loc) - #altitude(ship_loc));
+    val delta_lat_m = delta_lat * earthCircumference / 180.0;
+    val delta_long_m = delta_long * earthCircumference / 180.0;
+    val dist = Math.sqrt(sqr(delta_lat_m) + sqr(delta_long_m) + sqr(delta_alt));
+in
+    dist
+end;
+              <layout>fun get_traversed_distance(shipRes: ShipmentResult, earthCircumference: real) : real =
+let
+    val cargo = #cargo(shipRes);
+    val init_loc = #predictedLocation(#shipData(cargo));
+    val ship_loc = #location(#buyer(#shipment(#shipData(cargo))));
+    val delta_lat = abs(#latitude(init_loc) - #latitude(ship_loc));
+    val delta_long = abs(#longitude(init_loc) - #longitude(ship_loc));
+    val delta_alt = abs(#altitude(init_loc) - #altitude(ship_loc));
+    val delta_lat_m = delta_lat * earthCircumference / 180.0;
+    val delta_long_m = delta_long * earthCircumference / 180.0;
+    val dist = Math.sqrt(sqr(delta_lat_m) + sqr(delta_long_m) + sqr(delta_alt));
+in
+    dist
+end;</layout>
+            </ml>
+            <ml id="ID1414733981">fun get_delivery_payment(travDist: real, shipCostPerKM: real) : int =
+let
+    val cost = floor(travDist * shipCostPerKM);
+in
+    cost
+end;
+              <layout>fun get_delivery_payment(travDist: real, shipCostPerKM: real) : int =
+let
+    val cost = floor(travDist * shipCostPerKM);
+in
+    cost
+end;</layout>
+            </ml>
+            <ml id="ID1414419540">fun compute_error(cargo: Cargo, earthCircumference: real, localizationError: real) : real =
+let
+    val drone_loc = #location(#drone(cargo));
+    val ship_loc = #location(#buyer(#shipment(#shipData(cargo))));
+    val delta_lat = abs(#latitude(drone_loc) - #latitude(ship_loc));
+    val delta_long = abs(#longitude(drone_loc) - #longitude(ship_loc));
+    val delta_alt = abs(#altitude(drone_loc) - #altitude(ship_loc));
+    val delta_lat_m = delta_lat * earthCircumference / 180.0;
+    val delta_long_m = delta_long * earthCircumference / 180.0;
+    val dist = Math.sqrt(sqr(delta_lat_m) + sqr(delta_long_m) + sqr(delta_alt));
+    val error = dist / localizationError;
+in
+    error
+end;
+              <layout>fun compute_error(cargo: Cargo, earthCircumference: real, localizationError: real) : real =
+let
+    val drone_loc = #location(#drone(cargo));
+    val ship_loc = #location(#buyer(#shipment(#shipData(cargo))));
+    val delta_lat = abs(#latitude(drone_loc) - #latitude(ship_loc));
+    val delta_long = abs(#longitude(drone_loc) - #longitude(ship_loc));
+    val delta_alt = abs(#altitude(drone_loc) - #altitude(ship_loc));
+    val delta_lat_m = delta_lat * earthCircumference / 180.0;
+    val delta_long_m = delta_long * earthCircumference / 180.0;
+    val dist = Math.sqrt(sqr(delta_lat_m) + sqr(delta_long_m) + sqr(delta_alt));
+    val error = dist / localizationError;
+in
+    error
+end;</layout>
+            </ml>
+            <ml id="ID1414333950">fun reach_destination(cargo: Cargo) : Cargo =
+let
+    val drone_loc = #location(#drone(cargo));
+    val pred_loc = #predictedLocation(#shipData(cargo));
+    val ship_loc = #location(#buyer(#shipment(#shipData(cargo))));
+    val delta_lat = #latitude(drone_loc) - #latitude(pred_loc);
+    val delta_long = #longitude(drone_loc) - #longitude(pred_loc);
+    val delta_alt = #altitude(drone_loc) - #altitude(pred_loc);
+    val dest_loc = {
+        latitude=(#latitude(ship_loc) + delta_lat),
+        longitude=(#longitude(ship_loc) + delta_long),
+        altitude=(#altitude(ship_loc) + delta_alt)
+    };
+    val dest_cargo = {
+        drone={
+            id=(#id(#drone(cargo))),
+            location=dest_loc
+        },
+        shipData=(#shipData(cargo))
+    };
+in
+    dest_cargo
+end;
+              <layout>fun reach_destination(cargo: Cargo) : Cargo =
+let
+    val drone_loc = #location(#drone(cargo));
+    val pred_loc = #predictedLocation(#shipData(cargo));
+    val ship_loc = #location(#buyer(#shipment(#shipData(cargo))));
+    val delta_lat = #latitude(drone_loc) - #latitude(pred_loc);
+    val delta_long = #longitude(drone_loc) - #longitude(pred_loc);
+    val delta_alt = #altitude(drone_loc) - #altitude(pred_loc);
+    val dest_loc = {
+        latitude=(#latitude(ship_loc) + delta_lat),
+        longitude=(#longitude(ship_loc) + delta_long),
+        altitude=(#altitude(ship_loc) + delta_alt)
+    };
+    val dest_cargo = {
+        drone={
+            id=(#id(#drone(cargo))),
+            location=dest_loc
+        },
+        shipData=(#shipData(cargo))
+    };
+in
+    dest_cargo
+end;</layout>
+            </ml>
             <ml id="ID1414242648">fun get_optimal_drone_index(drones: LDrone, shipData: ShipmentData) : int =
 let
     fun dist_list_map(drone: Drone) : real =
@@ -4248,14 +4462,14 @@ shop</text>
         <text>drones</text>
         <ellipse w="60.000000"
                  h="40.000000"/>
-        <token x="-10.000000"
-               y="0.000000"/>
-        <marking x="0.000000"
+        <token x="2.000000"
+               y="9.000000"/>
+        <marking x="-1.000000"
                  y="0.000000"
                  hidden="false">
-          <snap snap_id="0"
-                anchor.horizontal="0"
-                anchor.vertical="0"/>
+          <snap snap_id="2"
+                anchor.horizontal="1"
+                anchor.vertical="3"/>
         </marking>
         <type id="ID1413780009">
           <posattr x="5.500000"
@@ -4366,8 +4580,8 @@ shipments</text>
         </port>
       </place>
       <place id="ID1413793696">
-        <posattr x="527.000000"
-                 y="-197.000000"/>
+        <posattr x="126.000000"
+                 y="-1092.000000"/>
         <fillattr colour="White"
                   pattern=""
                   filled="false"/>
@@ -4390,8 +4604,8 @@ payment</text>
                 anchor.vertical="0"/>
         </marking>
         <type id="ID1413793697">
-          <posattr x="570.500000"
-                   y="-223.000000"/>
+          <posattr x="169.500000"
+                   y="-1118.000000"/>
           <fillattr colour="White"
                     pattern="Solid"
                     filled="false"/>
@@ -4404,8 +4618,8 @@ payment</text>
                 version="4.0.1">INT</text>
         </type>
         <initmark id="ID1413793698">
-          <posattr x="592.000000"
-                   y="-170.000000"/>
+          <posattr x="191.000000"
+                   y="-1065.000000"/>
           <fillattr colour="White"
                     pattern="Solid"
                     filled="false"/>
@@ -4419,8 +4633,8 @@ payment</text>
         </initmark>
         <port id="ID1413795585"
               type="Out">
-          <posattr x="493.000000"
-                   y="-216.000000"/>
+          <posattr x="92.000000"
+                   y="-1111.000000"/>
           <fillattr colour="White"
                     pattern="Solid"
                     filled="false"/>
@@ -4484,59 +4698,6 @@ ready</text>
                 version="4.0.1"/>
         </initmark>
       </place>
-      <place id="ID1414310356">
-        <posattr x="504.000000"
-                 y="-441.000000"/>
-        <fillattr colour="White"
-                  pattern=""
-                  filled="false"/>
-        <lineattr colour="Black"
-                  thick="1"
-                  type="Solid"/>
-        <textattr colour="Black"
-                  bold="false"/>
-        <text>ready
-drones</text>
-        <ellipse w="60.000000"
-                 h="40.000000"/>
-        <token x="-10.000000"
-               y="0.000000"/>
-        <marking x="0.000000"
-                 y="0.000000"
-                 hidden="false">
-          <snap snap_id="0"
-                anchor.horizontal="0"
-                anchor.vertical="0"/>
-        </marking>
-        <type id="ID1414310357">
-          <posattr x="547.000000"
-                   y="-464.000000"/>
-          <fillattr colour="White"
-                    pattern="Solid"
-                    filled="false"/>
-          <lineattr colour="Black"
-                    thick="0"
-                    type="Solid"/>
-          <textattr colour="Black"
-                    bold="false"/>
-          <text tool="CPN Tools"
-                version="4.0.1">Drone</text>
-        </type>
-        <initmark id="ID1414310358">
-          <posattr x="560.000000"
-                   y="-417.000000"/>
-          <fillattr colour="White"
-                    pattern="Solid"
-                    filled="false"/>
-          <lineattr colour="Black"
-                    thick="0"
-                    type="Solid"/>
-          <textattr colour="Black"
-                    bold="false"/>
-          <text tool="CPN Tools"
-                version="4.0.1"/>
-        </initmark>
-      </place>
       <place id="ID1414319357">
         <posattr x="-42.000000"
                  y="-576.000000"/>
@@ -4578,6 +4739,165 @@ dest</text>
         <initmark id="ID1414319359">
           <posattr x="15.000000"
                    y="-552.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </initmark>
+      </place>
+      <place id="ID1414409733">
+        <posattr x="-42.000000"
+                 y="-798.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <text>shipment
+result</text>
+        <ellipse w="80.000000"
+                 h="40.000000"/>
+        <token x="-10.000000"
+               y="0.000000"/>
+        <marking x="0.000000"
+                 y="0.000000"
+                 hidden="false">
+          <snap snap_id="0"
+                anchor.horizontal="0"
+                anchor.vertical="0"/>
+        </marking>
+        <type id="ID1414409734">
+          <posattr x="39.000000"
+                   y="-821.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">ShipmentResult</text>
+        </type>
+        <initmark id="ID1414409735">
+          <posattr x="22.000000"
+                   y="-774.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </initmark>
+      </place>
+      <place id="ID1414750849">
+        <posattr x="-168.000000"
+                 y="-1092.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <text>client
+satisfied</text>
+        <ellipse w="72.000000"
+                 h="40.000000"/>
+        <token x="-10.000000"
+               y="0.000000"/>
+        <marking x="0.000000"
+                 y="0.000000"
+                 hidden="false">
+          <snap snap_id="0"
+                anchor.horizontal="0"
+                anchor.vertical="0"/>
+        </marking>
+        <type id="ID1414750850">
+          <posattr x="-91.000000"
+                   y="-1115.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">ClientFeedback</text>
+        </type>
+        <initmark id="ID1414750851">
+          <posattr x="-107.000000"
+                   y="-1068.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </initmark>
+      </place>
+      <place id="ID1414792424">
+        <posattr x="527.000000"
+                 y="-940.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <text>drone
+ready</text>
+        <ellipse w="60.000000"
+                 h="40.000000"/>
+        <token x="-10.000000"
+               y="0.000000"/>
+        <marking x="0.000000"
+                 y="0.000000"
+                 hidden="false">
+          <snap snap_id="0"
+                anchor.horizontal="0"
+                anchor.vertical="0"/>
+        </marking>
+        <type id="ID1414792425">
+          <posattr x="570.000000"
+                   y="-963.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">Drone</text>
+        </type>
+        <initmark id="ID1414792426">
+          <posattr x="583.000000"
+                   y="-916.000000"/>
           <fillattr colour="White"
                     pattern="Solid"
                     filled="false"/>
@@ -4728,6 +5048,232 @@ cargo</text>
         <priority id="ID1414303210">
           <posattr x="-109.000000"
                    y="-481.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </priority>
+      </trans>
+      <trans id="ID1414398065"
+             explicit="false">
+        <posattr x="-42.000000"
+                 y="-685.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <text>compute
+error</text>
+        <box w="60.000000"
+             h="40.000000"/>
+        <binding x="7.200000"
+                 y="-3.000000"/>
+        <cond id="ID1414398066">
+          <posattr x="-81.000000"
+                   y="-654.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </cond>
+        <time id="ID1414398067">
+          <posattr x="2.500000"
+                   y="-654.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </time>
+        <code id="ID1414398068">
+          <posattr x="22.500000"
+                   y="-737.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </code>
+        <priority id="ID1414398070">
+          <posattr x="-110.000000"
+                   y="-716.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </priority>
+      </trans>
+      <trans id="ID1414509004"
+             explicit="false">
+        <posattr x="527.000000"
+                 y="-440.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <text>announce
+drone
+ready</text>
+        <box w="76.000000"
+             h="40.000000"/>
+        <binding x="7.200000"
+                 y="-3.000000"/>
+        <cond id="ID1414509005">
+          <posattr x="480.000000"
+                   y="-409.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </cond>
+        <time id="ID1414509006">
+          <posattr x="579.500000"
+                   y="-409.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </time>
+        <code id="ID1414509007">
+          <posattr x="599.500000"
+                   y="-492.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </code>
+        <priority id="ID1414509009">
+          <posattr x="451.000000"
+                   y="-471.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </priority>
+      </trans>
+      <trans id="ID1414640329"
+             explicit="false">
+        <posattr x="-42.000000"
+                 y="-940.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <text>provide
+items</text>
+        <box w="60.000000"
+             h="40.000000"/>
+        <binding x="7.200000"
+                 y="-3.000000"/>
+        <cond id="ID1414640330">
+          <posattr x="-81.000000"
+                   y="-909.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </cond>
+        <time id="ID1414640331">
+          <posattr x="2.500000"
+                   y="-909.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </time>
+        <code id="ID1414640332">
+          <posattr x="22.500000"
+                   y="-992.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1"/>
+        </code>
+        <priority id="ID1414640334">
+          <posattr x="-110.000000"
+                   y="-971.000000"/>
           <fillattr colour="White"
                     pattern="Solid"
                     filled="false"/>
@@ -4918,7 +5464,7 @@ cargo</text>
         <transend idref="ID1414303205"/>
         <placeend idref="ID1414319357"/>
         <annot id="ID1414326636">
-          <posattr x="-24.000000"
+          <posattr x="41.500000"
                    y="-513.000000"/>
           <fillattr colour="White"
                     pattern="Solid"
@@ -4929,7 +5475,321 @@ cargo</text>
           <textattr colour="Black"
                     bold="false"/>
           <text tool="CPN Tools"
-                version="4.0.1"/>
+                version="4.0.1">reach_destination(cargo)</text>
+        </annot>
+      </arc>
+      <arc id="ID1414405836"
+           orientation="PtoT"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414398065"/>
+        <placeend idref="ID1414319357"/>
+        <annot id="ID1414405837">
+          <posattr x="-20.500000"
+                   y="-630.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">cargo</text>
+        </annot>
+      </arc>
+      <arc id="ID1414441402"
+           orientation="TtoP"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414398065"/>
+        <placeend idref="ID1414409733"/>
+        <annot id="ID1414441403">
+          <posattr x="222.500000"
+                   y="-741.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">{cargo=cargo, error=compute_error(cargo, earthCircumference, localizationError)}</text>
+        </annot>
+      </arc>
+      <arc id="ID1414542994"
+           orientation="TtoP"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414509004"/>
+        <placeend idref="ID1413780008"/>
+        <bendpoint id="ID1414545144"
+                   serial="1">
+          <posattr x="504.000000"
+                   y="-42.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+        </bendpoint>
+        <annot id="ID1414542995">
+          <posattr x="454.500000"
+                   y="-298.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">drone::drones</text>
+        </annot>
+      </arc>
+      <arc id="ID1414579914"
+           orientation="PtoT"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414509004"/>
+        <placeend idref="ID1413780008"/>
+        <bendpoint id="ID1414582115"
+                   serial="1">
+          <posattr x="546.000000"
+                   y="-28.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+        </bendpoint>
+        <annot id="ID1414579915">
+          <posattr x="572.000000"
+                   y="-224.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">drones</text>
+        </annot>
+      </arc>
+      <arc id="ID1414647196"
+           orientation="PtoT"
+           order="2">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414640329"/>
+        <placeend idref="ID1414409733"/>
+        <annot id="ID1414647197">
+          <posattr x="-70.500000"
+                   y="-871.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">shipRes</text>
+        </annot>
+      </arc>
+      <arc id="ID1414663295"
+           orientation="TtoP"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414640329"/>
+        <placeend idref="ID1413793696"/>
+        <annot id="ID1414663296">
+          <posattr x="356.000000"
+                   y="-996.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">get_delivery_payment(get_traversed_distance(shipRes, earthCircumference), shipmentCostPerKM)</text>
+        </annot>
+      </arc>
+      <arc id="ID1414812291"
+           orientation="PtoT"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414509004"/>
+        <placeend idref="ID1414792424"/>
+        <annot id="ID1414812292">
+          <posattr x="549.500000"
+                   y="-690.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">drone</text>
+        </annot>
+      </arc>
+      <arc id="ID1414817295"
+           orientation="TtoP"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414640329"/>
+        <placeend idref="ID1414792424"/>
+        <annot id="ID1414817296">
+          <posattr x="176.000000"
+                   y="-929.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">#drone(#cargo(shipRes))</text>
+        </annot>
+      </arc>
+      <arc id="ID1414829845"
+           orientation="TtoP"
+           order="1">
+        <posattr x="0.000000"
+                 y="0.000000"/>
+        <fillattr colour="White"
+                  pattern=""
+                  filled="false"/>
+        <lineattr colour="Black"
+                  thick="1"
+                  type="Solid"/>
+        <textattr colour="Black"
+                  bold="false"/>
+        <arrowattr headsize="1.200000"
+                   currentcyckle="2"/>
+        <transend idref="ID1414640329"/>
+        <placeend idref="ID1414750849"/>
+        <annot id="ID1414829846">
+          <posattr x="-348.000000"
+                   y="-994.000000"/>
+          <fillattr colour="White"
+                    pattern="Solid"
+                    filled="false"/>
+          <lineattr colour="Black"
+                    thick="0"
+                    type="Solid"/>
+          <textattr colour="Black"
+                    bold="false"/>
+          <text tool="CPN Tools"
+                version="4.0.1">construct_client_feedback(simulate_client_satisfaction(#error(shipRes)), shipRes)</text>
         </annot>
       </arc>
       <constraints/>
@@ -6041,19 +6901,27 @@ above</text>
             </zorder>
           </cpnsheet>
           <cpnsheet id="ID1413780527"
-                    panx="-297.000000"
-                    pany="-406.000000"
+                    panx="90.000000"
+                    pany="-938.000000"
                     zoom="1.000000"
                     instance="ID1413780031">
             <zorder>
               <position value="0"/>
             </zorder>
           </cpnsheet>
+          <textsheet id="ID1414337623"
+                     panx="7.000000"
+                     pany="20.000000"
+                     zoom="1.000000"
+                     decl="ID1414333950">
+            <zorder/>
+          </textsheet>
         </sheets>
         <zorder>
           <position value="0"/>
           <position value="1"/>
           <position value="2"/>
+          <position value="4"/>
           <position value="3"/>
         </zorder>
       </cpnbinder>
@@ -6164,18 +7032,18 @@ above</text>
                 <IndexNode expanded="true"/>
               </IndexNode>
             </IndexNode>
-            <IndexNode expanded="false">
+            <IndexNode expanded="true">
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
             </IndexNode>
-            <IndexNode expanded="false">
+            <IndexNode expanded="true">
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
             </IndexNode>
-            <IndexNode expanded="false">
+            <IndexNode expanded="true">
               <IndexNode expanded="true"/>
             </IndexNode>
             <IndexNode expanded="true">
@@ -6206,8 +7074,8 @@ above</text>
               <IndexNode expanded="true"/>
             </IndexNode>
             <IndexNode expanded="true">
-              <IndexNode expanded="true"/>
-              <IndexNode expanded="true"/>
+              <IndexNode expanded="false"/>
+              <IndexNode expanded="false"/>
             </IndexNode>
           </IndexNode>
           <IndexNode expanded="false">
@@ -6222,6 +7090,7 @@ above</text>
               </IndexNode>
             </IndexNode>
             <IndexNode expanded="true">
+              <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
             </IndexNode>
             <IndexNode expanded="true">
@@ -6237,13 +7106,32 @@ above</text>
             </IndexNode>
           </IndexNode>
           <IndexNode expanded="true">
-            <IndexNode expanded="false">
+            <IndexNode expanded="true">
+              <IndexNode expanded="true">
+                <IndexNode expanded="true"/>
+              </IndexNode>
+              <IndexNode expanded="true">
+                <IndexNode expanded="true"/>
+              </IndexNode>
+              <IndexNode expanded="true">
+                <IndexNode expanded="true"/>
+              </IndexNode>
+            </IndexNode>
+            <IndexNode expanded="true">
+              <IndexNode expanded="true"/>
+              <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
             </IndexNode>
-            <IndexNode expanded="false">
-              <IndexNode expanded="false"/>
-              <IndexNode expanded="false"/>
+            <IndexNode expanded="true">
               <IndexNode expanded="true"/>
+              <IndexNode expanded="true"/>
+              <IndexNode expanded="false"/>
+              <IndexNode expanded="false"/>
+              <IndexNode expanded="false"/>
+              <IndexNode expanded="false"/>
+              <IndexNode expanded="false"/>
+              <IndexNode expanded="false"/>
+              <IndexNode expanded="false"/>
             </IndexNode>
           </IndexNode>
         </IndexNode>

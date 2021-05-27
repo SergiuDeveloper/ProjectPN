@@ -1,0 +1,123 @@
+%=== CHAPTER ONE (1) ===
+%=== SPECIFICATIILE PROIECTULUI ===
+
+\chapter{Specificatiile proiectului}
+\begin{spacing}{1.5}
+\setlength{\parskip}{0.3in}
+
+Obiectivul proiectului consta in modelarea proceselor din cadrul unei companii bazate pe mai multe module:
+\begin{itemize}
+\item Modulul "HQ", care coordoneaza departamentele
+\item Modulul "Shop", in cadrul caruia se genereaza si se comercializeaza produse
+\item Modulul "Localization", care trateaza localizarea clientilor, pe baza informatiei primite de la sateliti de GPS, in scopul transportului produsului cerut
+\item Modulul "Shipment", in cadrul caruia produsul este transportat si predat clientului
+\item Modulul "Customer Service", care asigneaza un agent unei reclamatii primite din partea unui client, in urma unei livrari
+\item Modulul "Marketing", care serveste gasirea noilor clienti, prin organizarea campaniilor de marketing.
+\end{itemize}
+
+\section{Modulul "HQ"}
+
+\includegraphics[width=\textwidth]{./Parts/Chapter1/HQ.png}
+
+Modulul "HQ" are ca scop coordonarea departamentelor din cadrul companiei.\\
+In primul rand, din starea $init$ se realizeaza tranzitia $initialize$, activand componentele "Shop" si
+"Localization".\\
+In urma realizarii unei vanzari in cadrul modulului "Shop", se plaseaza profitul, in starea $profit$, care
+apoi poate la bugetul companiei, situat in starea $budget$, prin tranzitia $add\ profit\ to\ budget$.
+Pentru fiecare tranzactie, componenta "Shop" adauga o entitate de tip $Shipment$, in starea
+$pending\ shipments$. Prin tranzitia $get\ buyer\ location$ se plaseaza locatia cumparatorului in
+$buyer\ location$, fiind input pentru modulul "Localization". Locatia reala a clientului nu ar fi cunoscuta
+inainte de localizarea GPS, insa este reprezentata in cadrul retelei, in scop demonstrativ.\\
+In urma localizarii clientului, in starea $predicted\ location$ se vor gasi coordonatele aproximative ale
+cumparatorului. Entitatea de tip $Shipment$, situata in $pending\ shipments$ este concatenata cu locatia
+prezisa a clientului, returnand datele despre transport, in forma lor finala, in starea $shipment\ data$,
+prin tranzitia $prepare\ shipment$.\\
+Apoi, modulul de "Shipment" realizeaza livrarea, plasand in $delivery\ payment$ plata transportului, achitata
+de cumparatorul produsului. Transportul se realizeaza cu ajutorul dronelor, situate in starea $drones$,
+care pot fi cumparate prin tranzitia $acquire\ drone$, daca permite bugetul companiei.\\
+In urma livrarii, clientul poate face o reclamatie, stocata cu tipul $ClientFeedback$, in starea $complaints$.
+Reclamatiile sunt tratate de componenta "Customer Service". Agentii de customer service pot fi platiti prin
+tranzitia $donate\ to\ CS\ budget$, cu o suma prestabilita. In urma tratarii neintelegerii cu clientul,
+acesta va primi o compensatie din partea companiei, platita prin intermediul tranzitiei $pay\ compensations$.\\
+Pentru a gasi clienti noi, firma poate incepe o campanie de marketing, in cadrul modulului "Marketing".
+Clientii noi vor fi plasati in starea $potential\ clients$.
+
+\section{Modulul "Shop"}
+
+\includegraphics[width=\textwidth]{./Parts/Chapter1/Shop.png}
+
+Modulul "Shop" are ca scop generarea si comercializarea produselor oferite de companie.\\
+Mai intai, prin intermediul tranzitiei $open\ shop$, devine posibila generarea de noi produse si
+identificarea noilor clienti. Produsele sunt plasate in starea $products$, iar cumparatorii, in
+$buy\ requests$. Fiecarui produs i se atribuie un pret aleatoriu, generat pe baza unei distributii normale.
+Locatia clientilor este generata, de asemenea, aleatoriu. Latitudinea si longitudinea urmeaza distributii
+uniforme. Fiecare cumparator poate fi asociat cu un anumit tip de produs. In urma realizarii unei astfel de
+asocieri, prin tranzitia $sell$, se plaseaza noua livrare, in starea de output $pending\ shipments$.
+Profitul obtinut de companie se va afla in starea de output $profit$, urmand ca acesta sa fie adaugat la
+buget.
+
+\section{Modulul "Localization"}
+
+\includegraphics[width=\textwidth]{./Parts/Chapter1/Localization.png}
+
+Scopul modulului "Localization" este de a identifica locatia aproximativa a clientilor, pe baza satelitilor
+GPS.\\
+Datele despre sateliti sunt returnate de functia $get\_satellites\_data$, generata automat in fisierul sursa
+"satellites\_data.sml", creat cu ajutorul scriptului "get\_satellites\_data.py". Sunt stocate informatii
+reale despre pozitia satelitilor de GPS care orbiteaza in jurul Pamantului (latitudine, longitudine,
+altitudine).\\
+Locatiile satelitilor sunt plasate in starea $sats$, prin intermediul tranzitiei $load\ sats\ data$.
+Considerand locatia clientului (prezenta in $actual\ object\ location$, in scop demonstrativ), se sustrag
+satelitii aflati deasupra sa, doar acestia fiind capabili sa il localizeze. In urma executiei tranzitiei
+$localize$, satelitii de GPS aproximeaza locatia cumparatorului, plasand-o in starea de output
+$predicted\ location$. Aproximarea este supusa unei eroari generate aleatoriu uniform, per fiecare satelit.
+
+\section{Modulul "Shipment"}
+
+\includegraphics[width=\textwidth]{./Parts/Chapter1/Shipment.png}
+
+Modulul "Shipment" trateaza livrarea produselor catre client, cu ajutorul dronelor.\\
+Locatiile de input pentru aceasta componenta sunt $pending\ shipments$ si $drones$, continand date
+referitoare la transport si o lista cu dronele disponibile. In urma tranzitiei $prepare\ cargo$, se asigneaza
+drona cea mai apropiata de client, generandu-se o entitate de tip $Cargo$. Se executa actiunea $ship\ cargo$,
+se calculeaza pozitia finala a dronei. Pozitia finala depinde de eroarea rezultata din aproximarea pozitiei
+cumparatorului, in modulul "Localization". Eroarea este calculata in cadrul tranzitiei $compute\ error$,
+plasand rezultatul transportului in $shipment\ result$. In urma executiei actiunii $provide\ items$, drona
+este stocata in $drone\ ready$, urmand ca aceasta sa fie readaugata in locatia $drones$, prin tranzitia
+$announce\ drone\ ready$. Clientul achita pretul transportului, calculat in functie de distanta parcursa.
+Suma este plasata in $delivery\ payment$, urmand ca aceasta sa fie adaugata la bugetul companiei.
+Feedback-ul clientului este stocat in starea $client\ satisfied$. Acestea depinde de eroarea in aproximarea
+locatiei in care este livrat produsul. In cazul in care clientul este nemultumit, acesta poate trimite
+o reclamatie companiei, prin $file\ complaint$. Reclamatiile vor fi tratate de echipa "Customer Service".
+
+\section{Modulul "Customer Service"}
+
+\includegraphics[width=\textwidth]{./Parts/Chapter1/CustomerService.png}
+
+Modulul "Customer Service" trateaza reclamatiile primite de la clienti in urma livrarilor.\\
+Reclamatiile vor fi stocate in locatia $complaints$. Daca sunt agenti disponibili in $CS\ employees$,
+se asigneaza unul dintre ei respectivei reclamatii, prin tranzitia $assign\ agent$, generandu-se in $tasks$
+o entitate de tip $CSTask$. In urma tratarii unui task, clientului i se promite o compensatie, care va fi
+achitata, pe baza bugetului companiei, in modulul "HQ". Dupa finalizarea unui task, angajatul este plasat
+in locatia $on\ hold\ employees$. Bugetul asignat agentilor de customer service se afla in starea de input
+$CS\ employees\ budget$. Angajatul nu va fi disponibil pentru a trata o alta reclamatie pana cand nu este
+platit de catre companie, prin tranzitia $pay\ employee$.
+
+\section{Modulul "Marketing"}
+
+\includegraphics[width=\textwidth]{./Parts/Chapter1/Marketing.png}
+
+Scopul modulului de "Marketing" este atragerea noilor clienti, in urma campaniilor de marketing.\\
+O singura campanie poate fi activa la un moment dat. Locatia $campaign\ pending$ asigura acest fapt.
+In urma executiei tranzitiei $start\ marketing\ campaign$, o noua campanie de este initializata. Intensitatea
+unei campanii determina numarul de clienti care vor fi convinsi spre a cumpara produsele companiei. Campaniile
+mai eficiente vor implica cheltuieli mai mari din partea companiei.
+Prin executia tranzitiei $get\ campaign\ results$, se plaseaza numarul de clienti noi in locatia $new\ clients$,
+acest numar fiind calculat pe baza unei distributii uniforme. Actiunea $welcome\ new\ clients$ adauga noii
+client in $potential\ clients$, aceasta fiind locatie input pentru modulul "Shop".
+
+\end{spacing}
+%=== END OF CHAPTER ONE ===
+\newpage
+
+

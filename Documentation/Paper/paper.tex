@@ -1,0 +1,86 @@
+% Re-defined by Z.C.TIAN (https://github.com/doem97)
+% This version comply with the Official EEE Dissertation Guidline in (https://eeen40028.eee.ntu.edu.sg/graduate/forms/Coursework/Student/PDFs/Guidelines/Diss_Guideline.pdf)
+% More information about dissertation can be found in (https://eeen40028.eee.ntu.edu.sg/graduate/index.htm)
+% Based on W.M.ZHAO version, original link in overleaf:
+% (https://www.overleaf.com/latex/templates/ntu-master-dissertation/ngnhrrwryccv)
+
+\documentclass[12pt]{report}
+
+%% Useful packages
+\usepackage[a4paper,top=3cm,bottom=3cm,left=3.5cm,right=3cm,marginparwidth=1.75cm,headheight=22pt]{geometry}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{courier}
+\usepackage[export]{adjustbox}
+\usepackage[labelfont=bf, textfont=bf]{caption}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage{subfigure}
+\usepackage{setspace}
+\usepackage{lipsum}
+\usepackage{fancyhdr} % Fancy header
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx} %Times Font
+\usepackage{placeins}
+\usepackage{graphicx}
+\usepackage[toc]{appendix}
+
+%==== Header and Footer configure ====
+% Define the plain pagestyle used by most chapters
+\fancypagestyle{plain}{
+\fancyhf{} % Clear header footer
+\fancyhead[R]{\bf \textsl{\leftmark} \vspace{0.1in}}
+\fancyfoot[R]{\thepage}
+% Set the right side of the footer to be the page number
+\renewcommand{\headrulewidth}{2pt}
+}
+% For those Chapter* (Can't use \leftmark to call their chapter name directly)
+\fancypagestyle{addin}{
+\fancyhf{} % Clear header footer
+\fancyhead[R]{\bf \textsl{\leftmark} \vspace{0.1in}}
+% Set the right side of the footer to be the page number
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{2pt}
+}
+
+%==== Overall Config ====
+\setlength{\parindent}{0in} % Set paragraph indent as 0
+% \setlength{\fboxsep}{-0.3in}%
+\setlength{\fboxrule}{0.5pt} % Set the bounding box around the image as 0.5pt
+\pagestyle{plain}
+
+
+
+\begin{document}
+\fontdimen2\font=0.5em% inter word space
+%==== FRONT PART====
+\include{Title/coverpage} % Coverpage
+%\include{Title/titlepage} % Titlepage
+%\include{Title/SoO} % SoO
+%\include{Title/SDS} % SDS
+%\include{Title/AAS} % AAS
+
+%\begingroup
+%\let\cleardoublepage\clearpage
+
+\pagenumbering{roman}
+
+\renewcommand*\contentsname{\centering Table of Contents}
+\tableofcontents
+\newpage
+
+%\endgroup
+
+%==== MAIN PART ====
+
+\pagenumbering{arabic}
+\include{Parts/Chapter1/Chapter1}
+\include{Parts/Chapter2/Chapter2}
+
+%==== ENDING PART ===
+%==== END OF ALL ===
+\end{document}

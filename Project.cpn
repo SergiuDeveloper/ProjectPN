@@ -362,15 +362,6 @@ end;</layout>
         </block>
         <block id="ID1413506746">
           <id>Shop</id>
-          <block id="ID1413609123">
-            <id>Vals</id>
-            <ml id="ID1413772405">val minPrice = 50;
-              <layout>val minPrice = 50;</layout>
-            </ml>
-            <ml id="ID1413626129">val averagePrice = 1000;
-              <layout>val averagePrice = 1000;</layout>
-            </ml>
-          </block>
           <block id="ID1413509113">
             <id>Colsets</id>
             <block id="ID1413512328">
@@ -416,6 +407,15 @@ end;</layout>
                 <layout>colset Buyer = record productType:ProductType * location:Location;</layout>
               </color>
             </block>
+          </block>
+          <block id="ID1413609123">
+            <id>Vals</id>
+            <ml id="ID1413772405">val minPrice = 50;
+              <layout>val minPrice = 50;</layout>
+            </ml>
+            <ml id="ID1413626129">val averagePrice = 1000;
+              <layout>val averagePrice = 1000;</layout>
+            </ml>
           </block>
           <block id="ID1413554486">
             <id>Vars</id>
@@ -10509,9 +10509,9 @@ clients</text>
     </options>
     <binders>
       <cpnbinder id="ID2222"
-                 x="456"
-                 y="47"
-                 width="1738"
+                 x="290"
+                 y="674"
+                 width="958"
                  height="963">
         <sheets>
           <cpnsheet id="ID2215"
@@ -10574,8 +10574,8 @@ clients</text>
           <position value="0"/>
           <position value="1"/>
           <position value="2"/>
-          <position value="4"/>
           <position value="5"/>
+          <position value="4"/>
         </zorder>
       </cpnbinder>
     </binders>
@@ -10675,7 +10675,7 @@ clients</text>
         </IndexNode>
         <IndexNode expanded="true">
           <IndexNode expanded="false">
-            <IndexNode expanded="true">
+            <IndexNode expanded="false">
               <IndexNode expanded="true">
                 <IndexNode expanded="true"/>
                 <IndexNode expanded="true"/>
@@ -10686,54 +10686,54 @@ clients</text>
                 <IndexNode expanded="true"/>
               </IndexNode>
             </IndexNode>
-            <IndexNode expanded="true">
+            <IndexNode expanded="false">
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
             </IndexNode>
-            <IndexNode expanded="true">
+            <IndexNode expanded="false">
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
               <IndexNode expanded="true"/>
             </IndexNode>
-            <IndexNode expanded="true">
+            <IndexNode expanded="false">
               <IndexNode expanded="true"/>
             </IndexNode>
-            <IndexNode expanded="true">
+            <IndexNode expanded="false">
               <IndexNode expanded="false"/>
               <IndexNode expanded="false"/>
               <IndexNode expanded="false"/>
               <IndexNode expanded="false"/>
               <IndexNode expanded="false"/>
-            </IndexNode>
-          </IndexNode>
-          <IndexNode expanded="false">
-            <IndexNode expanded="true">
-              <IndexNode expanded="true"/>
-              <IndexNode expanded="true"/>
-            </IndexNode>
-            <IndexNode expanded="true">
-              <IndexNode expanded="true">
-                <IndexNode expanded="true"/>
-                <IndexNode expanded="true"/>
-              </IndexNode>
-              <IndexNode expanded="true">
-                <IndexNode expanded="true"/>
-              </IndexNode>
-            </IndexNode>
-            <IndexNode expanded="true">
-              <IndexNode expanded="true"/>
-              <IndexNode expanded="true"/>
-              <IndexNode expanded="true"/>
-            </IndexNode>
-            <IndexNode expanded="true">
-              <IndexNode expanded="true"/>
-              <IndexNode expanded="true"/>
             </IndexNode>
           </IndexNode>
           <IndexNode expanded="true">
+            <IndexNode expanded="true">
+              <IndexNode expanded="true">
+                <IndexNode expanded="true"/>
+                <IndexNode expanded="true"/>
+              </IndexNode>
+              <IndexNode expanded="true">
+                <IndexNode expanded="true"/>
+              </IndexNode>
+            </IndexNode>
+            <IndexNode expanded="true">
+              <IndexNode expanded="true"/>
+              <IndexNode expanded="true"/>
+            </IndexNode>
+            <IndexNode expanded="true">
+              <IndexNode expanded="true"/>
+              <IndexNode expanded="true"/>
+              <IndexNode expanded="true"/>
+            </IndexNode>
+            <IndexNode expanded="true">
+              <IndexNode expanded="true"/>
+              <IndexNode expanded="true"/>
+            </IndexNode>
+          </IndexNode>
+          <IndexNode expanded="false">
             <IndexNode expanded="true">
               <IndexNode expanded="true">
                 <IndexNode expanded="true"/>

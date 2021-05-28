@@ -22,8 +22,8 @@ Obiectivul proiectului consta in modelarea proceselor din cadrul unei companii b
 Modulul "HQ" are ca scop coordonarea departamentelor din cadrul companiei.\\
 In primul rand, din starea $init$ se realizeaza tranzitia $initialize$, activand componentele "Shop" si
 "Localization".\\
-In urma realizarii unei vanzari in cadrul modulului "Shop", se plaseaza profitul, in starea $profit$, care
-apoi poate la bugetul companiei, situat in starea $budget$, prin tranzitia $add\ profit\ to\ budget$.
+In urma realizarii unei vanzari in cadrul modulului "Shop", se plaseaza profitul in starea $profit$, care
+apoi se poate adauga la bugetul companiei, situat in starea $budget$, prin tranzitia $add\ profit\ to\ budget$.
 Pentru fiecare tranzactie, componenta "Shop" adauga o entitate de tip $Shipment$, in starea
 $pending\ shipments$. Prin tranzitia $get\ buyer\ location$ se plaseaza locatia cumparatorului in
 $buyer\ location$, fiind input pentru modulul "Localization". Locatia reala a clientului nu ar fi cunoscuta
@@ -79,14 +79,14 @@ $predicted\ location$. Aproximarea este supusa unei eroari generate aleatoriu un
 Modulul "Shipment" trateaza livrarea produselor catre client, cu ajutorul dronelor.\\
 Locatiile de input pentru aceasta componenta sunt $pending\ shipments$ si $drones$, continand date
 referitoare la transport si o lista cu dronele disponibile. In urma tranzitiei $prepare\ cargo$, se asigneaza
-drona cea mai apropiata de client, generandu-se o entitate de tip $Cargo$. Se executa actiunea $ship\ cargo$,
+drona cea mai apropiata de client, generandu-se o entitate de tip $Cargo$. In cadrul tranzitiei $ship\ cargo$
 se calculeaza pozitia finala a dronei. Pozitia finala depinde de eroarea rezultata din aproximarea pozitiei
 cumparatorului, in modulul "Localization". Eroarea este calculata in cadrul tranzitiei $compute\ error$,
 plasand rezultatul transportului in $shipment\ result$. In urma executiei actiunii $provide\ items$, drona
 este stocata in $drone\ ready$, urmand ca aceasta sa fie readaugata in locatia $drones$, prin tranzitia
 $announce\ drone\ ready$. Clientul achita pretul transportului, calculat in functie de distanta parcursa.
 Suma este plasata in $delivery\ payment$, urmand ca aceasta sa fie adaugata la bugetul companiei.
-Feedback-ul clientului este stocat in starea $client\ satisfied$. Acestea depinde de eroarea in aproximarea
+Feedback-ul clientului este stocat in starea $client\ satisfied$. Acesta depinde de eroarea in aproximarea
 locatiei in care este livrat produsul. In cazul in care clientul este nemultumit, acesta poate trimite
 o reclamatie companiei, prin $file\ complaint$. Reclamatiile vor fi tratate de echipa "Customer Service".
 
@@ -105,11 +105,11 @@ platit de catre companie, prin tranzitia $pay\ employee$.
 
 \section{Modulul "Marketing"}
 
-\includegraphics[width=\textwidth]{./Parts/Chapter1/Marketing.png}
+\includegraphics[width=0.8\textwidth]{./Parts/Chapter1/Marketing.png}
 
 Scopul modulului de "Marketing" este atragerea noilor clienti, in urma campaniilor de marketing.\\
 O singura campanie poate fi activa la un moment dat. Locatia $campaign\ pending$ asigura acest fapt.
-In urma executiei tranzitiei $start\ marketing\ campaign$, o noua campanie de este initializata. Intensitatea
+In urma executiei tranzitiei $start\ marketing\ campaign$, o noua campanie este initializata. Intensitatea
 unei campanii determina numarul de clienti care vor fi convinsi spre a cumpara produsele companiei. Campaniile
 mai eficiente vor implica cheltuieli mai mari din partea companiei.
 Prin executia tranzitiei $get\ campaign\ results$, se plaseaza numarul de clienti noi in locatia $new\ clients$,

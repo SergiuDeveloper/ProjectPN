@@ -7,11 +7,117 @@
 
 \section{Colset-uri}
 
+Colset-urile declarate in cadrul modelului sunt urmatoarele:
+\begin{itemize}
+\item Location = record latitude:REAL * longitude:REAL * altitude:REAL
+\item PredictedLocation = record original:Location * predicted:Location
+\item Satellite = record id:INT * name:STRING * latitude:REAL * longitude:REAL * altitude:REAL
+\item LSatellite = list Satellite
+\item LocalizationCluster = record location:Location * satellites:LSatellite
+\item ProductType = index P with 1..10
+\item Product = record productType:ProductType * price:INT
+\item Buyer = record productType:ProductType * location:Location
+\item Shipment = record buyer:Buyer
+\item ShipmentData = record shipment:Shipment * predictedLocation:Location
+\item Drone = record id:INT * location:Location
+\item LDrone = list Drone
+\item Cargo = record drone:Drone * shipData:ShipmentData
+\item ShipmentResult = record cargo:Cargo * error:REAL
+\item ClientFeedback = record isSatisfied:BOOL * shipRes:ShipmentResult
+\item CSEmployee = index E with 1..10
+\item CSTask = record clientFb:ClientFeedback * agent:CSEmployee
+\item CampaignIntensity = index CI with 1..10.
+\end{itemize}
+
 \section{Variabile}
+
+Variabilele folosite in cadrul modelului sunt urmatoarele:
+\begin{itemize}
+\item loc\_clus: LocalizationCluster
+\item sats: LSatellite
+\item loc: Location
+\item predLoc: PredictedLocation
+\item pt: ProductType
+\item prod: Product
+\item buyer: Buyer
+\item i, j, k: INT
+\item drone: Drone
+\item drones: LDrone
+\item shipment: Shipment
+\item shipData: ShipmentData
+\item cargo: Cargo
+\item shipRes: ShipmentResult
+\item clientFb: ClientFeedback
+\item csEmpl: CSEmployee
+\item csTask: CSTask
+\end{itemize}
 
 \section{Constante}
 
+Constantele folosite in cadrul modelului sunt urmatoarele:
+\begin{itemize}
+\item radDegRatio = 0.0174532925
+\item earthRadius = 6371.0
+\item earthCircumference = 2.0 * Math.pi * earthRadius
+\item localizationError = 0.015 / earthCircumference
+\item minPrice = 50
+\item averagePrice = 1000
+\item droneCost = 1000
+\item shipmentCostPerKM = 0.25
+\item compensation = 500
+\item csEmployeeWage = 100
+\end{itemize}
+
 \section{Functii}
+
+In continuare vor fi prezentate functiile folosite in cadrul modelului.\\
+
+\lstinputlisting[caption={Returneaza pozitiile satelitilor de GPS},captionpos=b]{./Parts/Chapter2/satellites_data.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Verifica daca un satelit este deasupra unui reper},captionpos=b]{./Parts/Chapter2/is_satellite_above.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Returneaza o lista cu satelitii aflati deasupra unui reper},captionpos=b]{./Parts/Chapter2/get_satellites_above.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Aproximeaza locatia unui obiect, pe baza observatiilor mai multor sateliti GPS},captionpos=b]{./Parts/Chapter2/localize.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Genereaza un produs, avand un anumit tip, cu un pret aleatoriu, pe baza unei distributii normale},captionpos=b]{./Parts/Chapter2/generate_product.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Genereaza un client care are nevoie de un produs cu un anumit tip, cu o locatie aleatorie, pe baza unor distributii uniforme},captionpos=b]{./Parts/Chapter2/generate_buyer.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Construieste o entitate de tip ShipmentData, pe baza unui shipment si a unei locatii prezise de modulul de localizare},captionpos=b]{./Parts/Chapter2/construct_shipment_data.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Genereaza o drona, cu o locatie aleatorie, pe baza unor distributii uniforme},captionpos=b]{./Parts/Chapter2/generate_drone.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Construieste o entitate de tip ClientFeedback},captionpos=b]{./Parts/Chapter2/construct_client_feedback.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Genereaza satisfactia clientului, pe baza unei distributii uniforme, considerand eroarea de localizare},captionpos=b]{./Parts/Chapter2/simulate_client_satisfaction.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Calculeaza distanta parcursa de o drona in cadrul unui transport},captionpos=b]{./Parts/Chapter2/get_traversed_distance.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Calculeaza costul unui transport, in functie de distanta parcursa de drona},captionpos=b]{./Parts/Chapter2/get_delivery_payment.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Calculeaza eroarea procentuala dintre locatia finala a dronei si locatia reala a clientului},captionpos=b]{./Parts/Chapter2/compute_error.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Calculeaza pozitia finala a dronei, dupa realizarea transportului, considerand eroarea de estimare a locatiei clientului},captionpos=b]{./Parts/Chapter2/reach_destination.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Returneaza indexul dronei care este cea mai apropiata de un anumit client},captionpos=b]{./Parts/Chapter2/get_optimal_drone_index.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Creaza un obiect de tip Cargo, asignand drona cea mai apropiata de un anumit client},captionpos=b]{./Parts/Chapter2/pick_optimal_drone.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Scoate dintr-o lista de drone, drona cea mai apropiata de un anumit client},captionpos=b]{./Parts/Chapter2/remove_optimal_drone.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Genereaza o entitate de tip CSTask, asignand un agent unei reclamatii},captionpos=b]{./Parts/Chapter2/assign_agent.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Calculeaza costul unei campanii de marketing, in functie de intensitatea ei},captionpos=b]{./Parts/Chapter2/get_campaign_cost.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Genereaza un numar aleatoriu de noi clienti, pe baza unei distributii uniforme, in functie de intensitatea campaniei},captionpos=b]{./Parts/Chapter2/get_new_clients.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Transforma un tuplu de coordonate LLA in coordonate XYZ},captionpos=b]{./Parts/Chapter2/lla_to_xyz.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Returneaza patratul unui numar},captionpos=b]{./Parts/Chapter2/sqr.sml}
+\vspace*{1in}
+\lstinputlisting[caption={Ridica un numar la o anumita putere},captionpos=b]{./Parts/Chapter2/pow.sml}
+\vspace*{1in}
 
 \end{spacing}
 %=== END OF CHAPTER TWO ===

@@ -1,7 +1,6 @@
-fun get_traversed_distance(shipRes: ShipmentResult, earthCircumference: real) : real =
+fun get_traversed_distance(cargo: Cargo, earthCircumference: real) : real =
 let
-    val cargo = #cargo(shipRes);
-    val init_loc = #predictedLocation(#shipData(cargo));
+    val init_loc = #location(#drone(cargo));
     val ship_loc = #location(#buyer(#shipment(#shipData(cargo))));
     val delta_lat = abs(#latitude(init_loc) - #latitude(ship_loc));
     val delta_long = abs(#longitude(init_loc) - #longitude(ship_loc));

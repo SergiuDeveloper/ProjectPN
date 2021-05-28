@@ -81,14 +81,15 @@ Locatiile de input pentru aceasta componenta sunt $pending\ shipments$ si $drone
 referitoare la transport si o lista cu dronele disponibile. In urma tranzitiei $prepare\ cargo$, se asigneaza
 drona cea mai apropiata de client, generandu-se o entitate de tip $Cargo$. In cadrul tranzitiei $ship\ cargo$
 se calculeaza pozitia finala a dronei. Pozitia finala depinde de eroarea rezultata din aproximarea pozitiei
-cumparatorului, in modulul "Localization". Eroarea este calculata in cadrul tranzitiei $compute\ error$,
-plasand rezultatul transportului in $shipment\ result$. In urma executiei actiunii $provide\ items$, drona
-este stocata in $drone\ ready$, urmand ca aceasta sa fie readaugata in locatia $drones$, prin tranzitia
-$announce\ drone\ ready$. Clientul achita pretul transportului, calculat in functie de distanta parcursa.
-Suma este plasata in $delivery\ payment$, urmand ca aceasta sa fie adaugata la bugetul companiei.
-Feedback-ul clientului este stocat in starea $client\ satisfied$. Acesta depinde de eroarea in aproximarea
-locatiei in care este livrat produsul. In cazul in care clientul este nemultumit, acesta poate trimite
-o reclamatie companiei, prin $file\ complaint$. Reclamatiile vor fi tratate de echipa "Customer Service".
+cumparatorului, in modulul "Localization". De asemenea, se calculeaza costul transportului, suma platita
+de client fiind stocata in locatia de output $delivery\ payment$, urmand ca aceasta sa fie adaugata
+la bugetul companiei. Eroarea este calculata in cadrul tranzitiei $compute\ error$, plasand rezultatul
+transportului in $shipment\ result$. In urma executiei actiunii $provide\ items$, drona este stocata in
+$drone\ ready$, urmand ca aceasta sa fie readaugata in locatia $drones$, prin tranzitia
+$announce\ drone\ ready$. Feedback-ul clientului este stocat in starea $client\ satisfied$.
+Acesta depinde de eroarea in aproximarea locatiei in care este livrat produsul. In cazul in care
+clientul este nemultumit, acesta poate trimite o reclamatie companiei, prin $file\ complaint$.
+Reclamatiile vor fi tratate de echipa "Customer Service".
 
 \section{Modulul "Customer Service"}
 
